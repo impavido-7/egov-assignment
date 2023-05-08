@@ -58,14 +58,26 @@ const BookAppointment = () => {
     };
   }, []);
 
+  const initialErrorState = useMemo(() => {
+    return {
+      title: "",
+      from: "",
+      to: "",
+    };
+  }, []);
+
   // State to store the user provided values
   const [currentAppointment, setCurrentAppointment] = useState(
     componentData.initialSelectedAppointment
   );
 
+  // To save the error information
+  const [errorObj, setErrorObj] = useState(initialErrorState);
+
   // State to store the list of appointments
   const [appointments, setAppointments] = useState<AppointmentList[]>(
-    sortedInitialList.sortedAppointments
+    []
+    // sortedInitialList.sortedAppointments
   );
 
   // To show/hide the modal
@@ -93,11 +105,30 @@ const BookAppointment = () => {
   );
 
   const bookAppointment = () => {
+    setErrorObj(initialErrorState);
+
     if (
       !currentAppointment.from ||
       !currentAppointment.title ||
       !currentAppointment.to
     ) {
+      const getKeyValue = <T extends AppointmentList, K extends keyof T>(
+        obj: T,
+        key: K
+      ) => obj[key];
+
+      Object.keys(currentAppointment).forEach((key) => {
+        const value = getKeyValue(
+          currentAppointment,
+          key as keyof AppointmentList
+        );
+        if (!value) {
+          setErrorObj((prev) => ({
+            ...prev,
+            [key]: "This field is required",
+          }));
+        }
+      });
       return;
     }
 
@@ -163,55 +194,84 @@ const BookAppointment = () => {
       <div className="w-full m-auto p-5">
         <Card title="Book a new appointment">
           <div className="flex flex-col gap-5">
-            <Input
-              label="Title"
-              placeholder="Title"
-              value={currentAppointment.title}
-              onChange={(e) => {
-                setValues("title", e);
-              }}
-            />
+            <div>
+              <Input
+                label="Title"
+                placeholder="Title"
+                value={currentAppointment.title}
+                onChange={(e) => {
+                  setValues("title", e);
+                }}
+                required
+              />
+              {errorObj.title ? (
+                <span className="mt-1 inline-block text-red-500">
+                  {errorObj.title}
+                </span>
+              ) : null}
+            </div>
 
-            <DateTimePicker
-              label="Start Date & Time"
-              value={
-                currentAppointment.from
-                  ? new Date(currentAppointment.from)
-                  : undefined
-              }
-              onDateTimeChange={(e) => {
-                if (new Date().getTime() > new Date(e).getTime()) {
-                  setValues("from", new Date().getTime());
-                } else {
-                  setValues("from", new Date(e).getTime());
+            <div>
+              <DateTimePicker
+                label="Start Date & Time"
+                value={
+                  currentAppointment.from
+                    ? new Date(currentAppointment.from)
+                    : undefined
                 }
-              }}
-              min={moment().format(dateTimeLocalFormat)}
-            />
+                onDateTimeChange={(e) => {
+                  if (new Date().getTime() > new Date(e).getTime()) {
+                    setValues("from", new Date().getTime());
+                  } else {
+                    setValues("from", new Date(e).getTime());
+                  }
+                }}
+                min={moment().format(dateTimeLocalFormat)}
+                required
+              />
+              {errorObj.from ? (
+                <span className="mt-1 inline-block text-red-500">
+                  {errorObj.from}
+                </span>
+              ) : null}
+            </div>
 
-            <DateTimePicker
-              label="End Date & Time"
-              value={
-                currentAppointment.to
-                  ? new Date(currentAppointment.to)
-                  : undefined
-              }
-              onDateTimeChange={(e) => {
-                if (
-                  new Date(currentAppointment.from).getTime() >
-                  new Date(e).getTime()
-                ) {
-                  setValues("to", new Date(currentAppointment.from).getTime());
-                } else {
-                  setValues("to", new Date(e).getTime());
+            <div>
+              <DateTimePicker
+                label="End Date & Time"
+                value={
+                  currentAppointment.to
+                    ? new Date(currentAppointment.to)
+                    : undefined
                 }
-              }}
-              min={
-                currentAppointment.from
-                  ? moment(currentAppointment.from).format(dateTimeLocalFormat)
-                  : undefined
-              }
-            />
+                onDateTimeChange={(e) => {
+                  if (
+                    new Date(currentAppointment.from).getTime() >
+                    new Date(e).getTime()
+                  ) {
+                    setValues(
+                      "to",
+                      new Date(currentAppointment.from).getTime()
+                    );
+                  } else {
+                    setValues("to", new Date(e).getTime());
+                  }
+                }}
+                min={
+                  currentAppointment.from
+                    ? moment(currentAppointment.from).format(
+                        dateTimeLocalFormat
+                      )
+                    : undefined
+                }
+                required
+              />
+              {errorObj.to ? (
+                <span className="mt-1 inline-block text-red-500">
+                  {errorObj.to}
+                </span>
+              ) : null}
+            </div>
 
             <Button onClick={bookAppointment}>Book Appointment</Button>
           </div>

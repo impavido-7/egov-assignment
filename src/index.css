@@ -3,5 +3,13 @@
 @tailwind utilities;
 
 .table-class {
-  @apply border border-slate-300 p-2;
+  @apply border border-slate-300 p-2 text-gray-500;
+}
+
+.tab-menu-class {
+  @apply inline-block mt-0 mr-0 ml-0 mb-tabview p-2 text-center text-gray-500 border-b w-1/2;
+}
+
+.tab-menu-selected {
+  @apply text-white bg-red-400 border border-gray-700 border-b-transparent;
 }

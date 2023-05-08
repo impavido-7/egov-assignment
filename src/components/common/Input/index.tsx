@@ -3,13 +3,17 @@ type InputProps = {
   placeholder: string;
   value: string | number;
   onChange: (arg: string | number) => void;
+  required?: boolean;
 };
 
 const Input = (props: InputProps) => {
   return (
     <div className="bg-white rounded-lg">
       <div className="mb-1">
-        <label className="text-md"> {props.label} </label>
+        <label className="text-md">
+          {props.label}{" "}
+          {props.required ? <span className="text-red-500"> * </span> : null}
+        </label>
       </div>
       <input
         type="text"

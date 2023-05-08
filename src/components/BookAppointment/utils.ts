@@ -1,3 +1,6 @@
+import moment from "moment";
+
+import { dateFormat, timeFormat } from "../../modules/constants";
 import { AppointmentList } from "./types";
 
 export const checkIfDateRangeSelectedIsConflicted = (
@@ -55,5 +58,60 @@ export const getSortedAppointmentsAndDurationGap = (
   return {
     sortedAppointments,
     durationGap: getDurationGapBetweenAppointments(sortedAppointments),
+  };
+};
+
+export const groupBy = (key: string) => (array: any[]) =>
+  array.reduce((objectsByKeyValue, obj) => {
+    const value = obj[key];
+    objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
+    return objectsByKeyValue;
+  }, {});
+
+export const getAppointmentDataForCalendarView = (
+  appointments: AppointmentList[]
+) => {
+  const enrichedAppointments = appointments.map((appointment) => ({
+    ...appointment,
+    startDate: moment(appointment.from).format(dateFormat),
+  }));
+
+  const groupedBy = groupBy("startDate")(enrichedAppointments);
+
+  const dateMap = {};
+  let maxLength = -1;
+  Object.keys(groupedBy).forEach((appointment) => {
+    maxLength = Math.max(maxLength, groupedBy[appointment].length);
+    Object.assign(dateMap, {
+      [appointment]: { title: appointment, count: -1 },
+    });
+  });
+
+  type dateMapProp = {
+    title: string;
+    count: number;
+  };
+
+  const data = new Array(maxLength).fill(null);
+
+  Object.keys(groupedBy).forEach((appointmentDate) => {
+    groupedBy[appointmentDate].forEach((iappointment: AppointmentList) => {
+      const obj = dateMap[
+        appointmentDate as keyof typeof dateMap
+      ] as dateMapProp;
+      if (obj) {
+        obj.count += 1;
+        data[obj.count] = {
+          ...data[obj.count],
+          [appointmentDate]: `${moment(iappointment.from).format(timeFormat)} - 
+            ${moment(iappointment.to).format(timeFormat)}`,
+        };
+      }
+    });
+  });
+
+  return {
+    keys: Object.keys(groupedBy),
+    data,
   };
 };

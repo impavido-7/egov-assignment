@@ -4,10 +4,11 @@ import { dateFormat, dateTimeLocalFormat } from "../../../modules/constants";
 
 type DateTimePickerProps = {
   value?: Date;
-  label: string;
+  label?: string;
   onDateTimeChange: (arg: Date) => void;
   isDatePicker?: boolean;
   min?: string;
+  required?: boolean;
 };
 
 const DateTimePicker = ({
@@ -16,16 +17,22 @@ const DateTimePicker = ({
   onDateTimeChange,
   min,
   isDatePicker = false,
+  required = false,
 }: DateTimePickerProps) => {
   const format = isDatePicker ? dateFormat : dateTimeLocalFormat;
 
   return (
     <>
       <div className="bg-white rounded-lg">
-        <div className="mb-1">
-          <label className="text-md"> {label} </label>
-        </div>
-        <div className="w-full sm:w-52">
+        {label ? (
+          <div className="mb-1">
+            <label className="text-md">
+              {label}{" "}
+              {required ? <span className="text-red-500"> * </span> : null}
+            </label>
+          </div>
+        ) : null}
+        <div>
           <input
             type={isDatePicker ? "date" : "datetime-local"}
             className="appearance-none border rounded shadow py-3 px-2 text-gray-500"
