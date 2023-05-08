@@ -76,8 +76,7 @@ const BookAppointment = () => {
 
   // State to store the list of appointments
   const [appointments, setAppointments] = useState<AppointmentList[]>(
-    []
-    // sortedInitialList.sortedAppointments
+    sortedInitialList.sortedAppointments
   );
 
   // To show/hide the modal
